@@ -1,3 +1,5 @@
+# SWE Project by Thomas Smith and Meera Poudel
+
 class CourseInfo:
     def __init__(self, courseName: str, instructor: str, code: str, secNum: int, credit: int):
         self.courseName = courseName
