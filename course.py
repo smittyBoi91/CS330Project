@@ -163,7 +163,7 @@ class Timetable:
         while len(roomNum) != 3:
             roomNum = input("Room number must be 3 digits, please enter a valid room number:")
         location = building + " " + roomNum
-        TimeAndLocation = TimeAndLocation(time, days, location)
+        timeAndLocation = TimeAndLocation(time, days, location)
         # -------------------------Course Info-----------------------------------------
         courseName = input("Please enter the course name:")
         while len(courseName) == 0:
@@ -183,7 +183,7 @@ class Timetable:
             credit = input("Please enter a valid course credit: 1, 2, 3")
         credit = int(credit)
         info = CourseInfo(courseName, instructor, code, secNum, credit)
-        course = Course(TimeAndLocation, info, False)
+        course = Course(timeAndLocation, info, False)
         return course
 
     def editCourse(self):
