@@ -57,8 +57,27 @@ class Timetable:
         self.schedule = [Course]
         self.week = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
         self.times = ["8am", "9am", "10am", "11am", "12pm", "1pm", "2pm", "3pm", "4pm", "5pm"]
-        self.availableTimes = ["8am", "9am", "10am", "11am", "12pm", "1pm", "2pm", "3pm", "4pm", "5pm"]
-        # self.numCourses = len(courses)
+        self.availableTimes = {"Monday": ["8am", "9am", "10am", "11am", "12pm", "1pm", "2pm", "3pm", "4pm", "5pm"],
+                               "Tuesday": [ "9am", "10am", "11am", "12pm", "1pm", "2pm", "3pm", "4pm", "5pm"],
+                               "Wednesday": ["8am", "9am", "10am", "11am", "12pm", "1pm", "2pm", "3pm", "4pm", "5pm"],
+                               "Thursday": ["8am", "9am", "10am", "11am", "12pm", "1pm", "2pm", "3pm", "4pm", "5pm"],
+                               "Friday": ["8am", "9am", "10am", "11am", "12pm", "1pm", "2pm", "3pm", "4pm", "5pm"]}
+
+    def checkTimeAvailable(self, days: list, time: str) -> bool:
+        timeAvail = True
+        numDays = len(days)
+        for i in range(numDays):
+            times = self.availableTimes.get(days[i])
+            if time in times:
+                dayTimes = self.availableTimes[days[i]]
+                dayTimes.remove(time)
+                self.availableTimes[days[i]] = dayTimes
+            else:
+                timeAvail = False
+        return timeAvail
+
+    def getAvailableTimes(self, day: str):
+        print(self.availableTimes[day])
 
     def addCourse(self, course: Course):
         self.courses.append(course)
@@ -97,14 +116,6 @@ class Timetable:
                 timeFound = True
         return timeFound
 
-    # def timeAvailable(self, time: str) -> bool:
-    #     available = False
-    #     for i in self.availableTimes:
-    #         if i == time:
-    #             available = True
-    #             self.availableTimes.remove(time)
-    #     return available
-
     def checkDay(self, day: str) -> bool:
         dayFound = False
         for i in self.week:
@@ -115,13 +126,6 @@ class Timetable:
     def createCourse(self) -> Course:
         # -------------------------Time and Location-----------------------------------------
         days = []
-        time = input("Please enter the start time of the course e.g. 8am, 9am, 4pm:")
-        timeCheck = self.checkTime(time)
-        conflicts = False
-        # timeAvailable = self.timeAvailable(time)
-        while timeCheck == False:
-            time = input("Please enter a time between 8am and 5pm e.g. 9am, 11am, 4pm:")
-            timeCheck = self.checkTime(time)
         numDays = input("How many days will the class meet e.g. 1,2,3:")
         while numDays.isdigit() == False:
             numDays = input("Please enter a valid number of days e.g. 1, 2, 3:")
@@ -129,7 +133,6 @@ class Timetable:
         while numDays > 3:
             numDays = input("Classes dont meet more than 3 times per week, please enter a valid number: ")
             numDays = int(numDays)
-        notDay = False
         for i in range(numDays):
             if i == 0:
                 day = input("What is the first day the course meets:")
@@ -151,10 +154,16 @@ class Timetable:
                         day = day.capitalize()
                         dayCheck = self.checkDay(day)
                 days.append(day)
-        conflicts = self.checkConflicts(days, time)
-        # while conflicts:
-        #     print("This time and day are taken, please choose another time and day")
-        #     break
+        time = input("Please enter the start time of the course e.g. 8am, 9am, 4pm:")
+        timeCheck = self.checkTime(time)
+        while timeCheck == False:
+            time = input("Please enter a time between 8am and 5pm e.g. 9am, 11am, 4pm:")
+            timeCheck = self.checkTime(time)
+        conflicts = self.checkTimeAvailable(days, time)
+        while conflicts == False:
+            time = input("This Start time is not available, please choose another time:")
+            timeCheck = self.checkTime(time)
+            conflicts = self.checkTimeAvailable(days, time)
         building = input("Please enter the 4 letter building acronym e.g. BHSN:")
         while len(building) != 4:
             building = input("Building acronym must be 4 letters, please enter a valid acronym:")
@@ -280,7 +289,6 @@ class Timetable:
                     if done == "N":
                         stillEditing = False
             if edit == "T":
-# def __init__(self, time: str, days: [], location: str):
                 editList = ["to edit the time", "to edit the days", "to edit the location",]
                 for i in range(len(editList)):
                     print(f"press {i} {editList[i]}")
@@ -314,7 +322,6 @@ class Timetable:
                     while numDays > 3:
                         numDays = input("Classes dont meet more than 3 times per week, please enter a valid number: ")
                         numDays = int(numDays)
-                    notDay = False
                     for i in range(numDays):
                         if i == 0:
                             day = input("What is the first day the course meets:")
@@ -369,7 +376,7 @@ def main():
     time1 = TimeAndLocation("8am", ["Tuesday", "Thursday"], "BHSN 214")
     course1 = Course(time1, info1, False)
     schedule.addCourse(course1)
-    # schedule.printCourses()
+
     interacting = True
     while (interacting):
         firstPromt = input("Would you like to add or edit a course? Enter A for add, E for edit, or D if you are done:")
@@ -382,10 +389,11 @@ def main():
                 print("There are no courses in the schedule to edit, please add a course.")
             else:
                 schedule.editCourse()
+        if firstPromt == "P":
+            # code to print schedule
+            pass
         if firstPromt == "D":
             interacting = False
-
-
 main()
 # info1 = CourseInfo("math", "smith", "CS101", 1, 3)
 # time1 = TimeAndLocation("8am", ["Tuesday", "Thursday"], ("BHSN", 214))
