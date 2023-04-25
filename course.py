@@ -1,3 +1,5 @@
+import tkinter as tk
+
 class CourseInfo:
     def __init__(self, courseName: str, instructor: str, code: str, secNum: int, credit: int):
         self.courseName = courseName
@@ -406,6 +408,69 @@ class Timetable:
                     done = done.upper()
                     if done == "N":
                         stillEditing = False
+class CalendarUI:
+    def __init__(self, master):
+        self.master = master
+        master.title("Calendar")
+        master.configure(bg="#F2F2F2")
+        self.label_color = "#1E88E5"
+        self.days_of_week = ["Course Times", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+        self.time_slots = ["8am", "9am", "10am", "11am", "12pm", "1pm", "2pm", "3pm", "4pm", "5pm"]
+        self.frames = []
+
+        # Create a label for the days of the week
+        for i in range(len(self.days_of_week)):
+            day_label = tk.Label(self.master, text=self.days_of_week[i], font=("Arial", 12), bg=self.label_color, fg="white", padx=10, pady=5)
+            day_label.grid(row=0, column=i)
+
+        # Create frames for each day of the week
+        for i in range(len(self.days_of_week)):
+            day_frame = tk.Frame(self.master, bd=0, bg="white")
+            day_frame.grid(row=1, column=i, padx=10, pady=10, sticky="nsew")
+            day_frame.columnconfigure(0, weight=1)
+            self.frames.append(day_frame)
+
+            # Add hourly time slots to each day of the week
+            for j in range(len(self.time_slots)):
+                # if its the first slot, show all the times
+                if self.days_of_week[i] == self.days_of_week[0]:
+                    hour_slot = tk.Label(day_frame, text=self.time_slots[j], bd=1, relief="solid", width=10, height=2, bg="white", padx=5, pady=5)
+                    hour_slot.grid(row=j, column=0, padx=2, pady=2, sticky="nsew")
+
+                # all the other time slots
+                else:
+                    hour_slot = tk.Label(day_frame, text="", bd=1, relief="solid", width=10, height=2, bg="white", padx=5, pady=5)
+                    hour_slot.grid(row=j, column=0, padx=2, pady=2, sticky="nsew")
+
+        # Configure the rows and columns to have a consistent spacing
+        for i in range(len(self.days_of_week)):
+            self.master.columnconfigure(i, weight=1)
+
+    def add_course(self, course_name, instructor_name, code, section, credit, time_slot, days_of_week, location):
+        # course_name = CourseInfo.changeName
+        # instructor_name = CourseInfo.changeInstructor
+        # code = CourseInfo.changeCode
+        # section = CourseInfo.changeSecNum
+        # credit = CourseInfo.changeCredit
+        # time_slot = TimeAndLocation.changeTime
+        # days_of_week = TimeAndLocation.changeDays
+        # location = TimeAndLocation.changeLocation
+
+        # Find the day index for each day of the week
+        day_indices = []
+        for day in days_of_week:
+            day_index = self.days_of_week.index(day)
+            day_indices.append(day_index)
+
+            # Get the index of the time slot
+            time_slot_index = self.time_slots.index(time_slot)
+       
+            # Get the label for the specified time slot on the specified day
+            label = self.frames[day_index].grid_slaves(row=time_slot_index, column=0)[0]
+
+            # Set the label text to the course information
+            label.config(text=f"{course_name}\n{instructor_name} {code} {section} {credit}\n{time_slot} {day_index} {location}", bg="#B3E5FC")
+
 def main():
     schedule = Timetable()
     room1 = Room("BHSN 214")
@@ -417,23 +482,35 @@ def main():
     course1 = Course(time1, info1, False)
     schedule.addCourse(course1)
 
-    interacting = True
-    while (interacting):
-        firstPromt = input("Would you like to add or edit a course? Enter A for add, E for edit, or D if you are done:")
-        firstPromt = firstPromt.upper()
-        if firstPromt == "A":
-            course = schedule.createCourse()
-            schedule.addCourse(course)
-        if firstPromt == "E":
-            if len(schedule.courses) == 0:
-                print("There are no courses in the schedule to edit, please add a course.")
-            else:
-                schedule.editCourse()
-        if firstPromt == "P":
-            # code to print schedule
-            pass
-        if firstPromt == "D":
-            interacting = False
+    # interacting = True
+    # while (interacting):
+        # firstPromt = input("Would you like to add or edit a course? Enter A for add, E for edit, or D if you are done:")
+        # firstPromt = firstPromt.upper()
+        # if firstPromt == "A":
+            # course = schedule.createCourse()
+            # schedule.addCourse(course)
+        # if firstPromt == "E":
+            # if len(schedule.courses) == 0:
+                # print("There are no courses in the schedule to edit, please add a course.")
+            # else:
+                # schedule.editCourse()
+        # if firstPromt == "P":
+            # # code to print schedule
+            # pass
+        # if firstPromt == "D":
+            # interacting = False
+
+    root = tk.Tk()
+    calendar = CalendarUI(root)
+    calendar.add_course("Intro to Python", "Dr.Reed", "CS101", 1, 3, "10am", ["Tuesday", "Thursday"], "BHSN 224")
+    calendar.add_course("Software Engineering", "Dr.Feng", "CS330", 1, 3, "8am", ["Monday", "Wednesday", "Friday"], "BHSN 224")
+
+    # for courses in schedule.courses:
+        # calendar.add_course(CourseInfo.changeName, CourseInfo.changeInstructor, CourseInfo.changeCode, CourseInfo.changeSecNum, CourseInfo.changeCredit, TimeAndLocation.changeTime, TimeAndLocation.changeDays, TimeAndLocation.changeLocation)
+
+    root.mainloop()
+
+
 main()
 # info1 = CourseInfo("math", "smith", "CS101", 1, 3)
 # time1 = TimeAndLocation("8am", ["Tuesday", "Thursday"], ("BHSN", 214))
