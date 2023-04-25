@@ -37,6 +37,42 @@ class TimeAndLocation:
     def changeLocation(self, newLocation: str):
         self.location = newLocation
 
+        
+class Room:
+    def __init__(self, number):
+        self.number = number
+        self.schedule = {}
+
+    def add_unavailable_time(self, day, start_time, end_time):
+        if day not in self.schedule:
+            self.schedule[day] = []
+        self.schedule[day].append((start_time, end_time))
+
+    def is_available(self, day, start_time, end_time):
+        if day not in self.schedule:
+            return True
+        for period in self.schedule[day]:
+            if start_time < period[1] and end_time > period[0]:
+                return False
+        return True
+
+class Professor:
+    def __init__(self, name):
+        self.name = name
+        self.schedule = {}
+
+    def add_unavailable_time(self, day, start_time, end_time):
+        if day not in self.schedule:
+            self.schedule[day] = []
+        self.schedule[day].append((start_time, end_time))
+
+    def is_available(self, day, start_time, end_time):
+        if day not in self.schedule:
+            return True
+        for period in self.schedule[day]:
+            if start_time < period[1] and end_time > period[0]:
+                return False
+        return True
 
 class Course:
     def __init__(self, TimeAndLocation: TimeAndLocation, CourseInfo: CourseInfo, conflict: bool):
@@ -372,7 +408,11 @@ class Timetable:
                         stillEditing = False
 def main():
     schedule = Timetable()
-    info1 = CourseInfo("Intro to Python", "Dr.Reed", "CS101", 1, 3)
+    room1 = Room("BHSN 214")
+    room1.add_unavailable_time("Tuesday", "9am", "11am")
+    professor1 = Professor("Dr. Reed")
+    professor1.add_unavailable_time("Thursday", "8am", "10am")
+    info1 = CourseInfo("Intro to Python", professor1, room1, 1, 3)
     time1 = TimeAndLocation("8am", ["Tuesday", "Thursday"], "BHSN 214")
     course1 = Course(time1, info1, False)
     schedule.addCourse(course1)
