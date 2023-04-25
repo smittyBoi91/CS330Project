@@ -1,5 +1,6 @@
 import tkinter as tk
 
+
 class CourseInfo:
     def __init__(self, courseName: str, instructor: str, code: str, secNum: int, credit: int):
         self.courseName = courseName
@@ -39,7 +40,7 @@ class TimeAndLocation:
     def changeLocation(self, newLocation: str):
         self.location = newLocation
 
-        
+
 class Room:
     def __init__(self, number):
         self.number = number
@@ -58,6 +59,7 @@ class Room:
                 return False
         return True
 
+
 class Professor:
     def __init__(self, name):
         self.name = name
@@ -75,6 +77,7 @@ class Professor:
             if start_time < period[1] and end_time > period[0]:
                 return False
         return True
+
 
 class Course:
     def __init__(self, TimeAndLocation: TimeAndLocation, CourseInfo: CourseInfo, conflict: bool):
@@ -96,10 +99,19 @@ class Timetable:
         self.week = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
         self.times = ["8am", "9am", "10am", "11am", "12pm", "1pm", "2pm", "3pm", "4pm", "5pm"]
         self.availableTimes = {"Monday": ["8am", "9am", "10am", "11am", "12pm", "1pm", "2pm", "3pm", "4pm", "5pm"],
-                               "Tuesday": [ "9am", "10am", "11am", "12pm", "1pm", "2pm", "3pm", "4pm", "5pm"],
+                               "Tuesday": ["9am", "10am", "11am", "12pm", "1pm", "2pm", "3pm", "4pm", "5pm"],
                                "Wednesday": ["8am", "9am", "10am", "11am", "12pm", "1pm", "2pm", "3pm", "4pm", "5pm"],
                                "Thursday": ["8am", "9am", "10am", "11am", "12pm", "1pm", "2pm", "3pm", "4pm", "5pm"],
                                "Friday": ["8am", "9am", "10am", "11am", "12pm", "1pm", "2pm", "3pm", "4pm", "5pm"]}
+        # dict for avail room times
+        self.roomTimes = {}
+        # dict for avail professor times
+        self.profTimes = {}
+
+    def checkProfTime(self, prof: str, time: str) -> bool:
+        timeAvail = True
+        
+        return timeAvail
 
     def checkTimeAvailable(self, days: list, time: str) -> bool:
         timeAvail = True
@@ -142,7 +154,7 @@ class Timetable:
     def checkConflicts(self, days: list, time: str) -> bool:
         conflict = False
         for c in self.courses:
-            if c.TimeAndLocation.days == days and c.TimeAndLocation.time\
+            if c.TimeAndLocation.days == days and c.TimeAndLocation.time \
                     == time:
                 conflict = True
         return conflict
@@ -236,7 +248,7 @@ class Timetable:
     def editCourse(self):
         stillEditing = True
         numCourses = len(self.courses)
-        while(stillEditing):
+        while (stillEditing):
             self.printCourses()
             courseToEdit = input("Please enter the number for the course you would like to edit:")
             while len(courseToEdit) > 1 or len(courseToEdit) < 1:
@@ -327,7 +339,7 @@ class Timetable:
                     if done == "N":
                         stillEditing = False
             if edit == "T":
-                editList = ["to edit the time", "to edit the days", "to edit the location",]
+                editList = ["to edit the time", "to edit the days", "to edit the location", ]
                 for i in range(len(editList)):
                     print(f"press {i} {editList[i]}")
                 editChoice = input("Please enter the number that corresponds to the info you want to edit:")
@@ -408,6 +420,8 @@ class Timetable:
                     done = done.upper()
                     if done == "N":
                         stillEditing = False
+
+
 class CalendarUI:
     def __init__(self, master):
         self.master = master
@@ -420,13 +434,14 @@ class CalendarUI:
 
         # Create a label for the days of the week
         for i in range(len(self.days_of_week)):
-            day_label = tk.Label(self.master, text=self.days_of_week[i], font=("Arial", 12), bg=self.label_color, fg="white", padx=10, pady=5)
+            day_label = tk.Label(self.master, text=self.days_of_week[i], font=("Arial", 10), bg=self.label_color,
+                                 fg="white", padx=5, pady=5)
             day_label.grid(row=0, column=i)
 
         # Create frames for each day of the week
         for i in range(len(self.days_of_week)):
             day_frame = tk.Frame(self.master, bd=0, bg="white")
-            day_frame.grid(row=1, column=i, padx=10, pady=10, sticky="nsew")
+            day_frame.grid(row=1, column=i, padx=5, pady=5, sticky="nsew")
             day_frame.columnconfigure(0, weight=1)
             self.frames.append(day_frame)
 
@@ -434,27 +449,29 @@ class CalendarUI:
             for j in range(len(self.time_slots)):
                 # if its the first slot, show all the times
                 if self.days_of_week[i] == self.days_of_week[0]:
-                    hour_slot = tk.Label(day_frame, text=self.time_slots[j], bd=1, relief="solid", width=10, height=2, bg="white", padx=5, pady=5)
+                    hour_slot = tk.Label(day_frame, text=self.time_slots[j], bd=1, relief="solid", width=10, height=2,
+                                         bg="white", padx=5, pady=5)
                     hour_slot.grid(row=j, column=0, padx=2, pady=2, sticky="nsew")
 
                 # all the other time slots
                 else:
-                    hour_slot = tk.Label(day_frame, text="", bd=1, relief="solid", width=10, height=2, bg="white", padx=5, pady=5)
+                    hour_slot = tk.Label(day_frame, text="", bd=1, relief="solid", width=10, height=2, bg="white",
+                                         padx=5, pady=5)
                     hour_slot.grid(row=j, column=0, padx=2, pady=2, sticky="nsew")
 
         # Configure the rows and columns to have a consistent spacing
         for i in range(len(self.days_of_week)):
             self.master.columnconfigure(i, weight=1)
 
-    def add_course(self, course_name, instructor_name, code, section, credit, time_slot, days_of_week, location):
-        # course_name = CourseInfo.changeName
-        # instructor_name = CourseInfo.changeInstructor
-        # code = CourseInfo.changeCode
-        # section = CourseInfo.changeSecNum
-        # credit = CourseInfo.changeCredit
-        # time_slot = TimeAndLocation.changeTime
-        # days_of_week = TimeAndLocation.changeDays
-        # location = TimeAndLocation.changeLocation
+    def add_course(self, course: Course):
+        course_name = course.CourseInfo.courseName
+        instructor_name = course.CourseInfo.instructor
+        code = course.CourseInfo.code
+        section = course.CourseInfo.secNum
+        credit = course.CourseInfo.credit
+        time_slot = course.TimeAndLocation.time
+        days_of_week = course.TimeAndLocation.days
+        location = course.TimeAndLocation.location
 
         # Find the day index for each day of the week
         day_indices = []
@@ -464,49 +481,34 @@ class CalendarUI:
 
             # Get the index of the time slot
             time_slot_index = self.time_slots.index(time_slot)
-       
+
             # Get the label for the specified time slot on the specified day
             label = self.frames[day_index].grid_slaves(row=time_slot_index, column=0)[0]
 
             # Set the label text to the course information
-            label.config(text=f"{course_name}\n{instructor_name} {code} {section} {credit}\n{time_slot} {day_index} {location}", bg="#B3E5FC")
+            label.config(
+                text=f"{course_name}\n{instructor_name} {code} {section} {credit}\n{time_slot} {location}",
+                bg="#B3E5FC")
+
 
 def main():
     schedule = Timetable()
-    room1 = Room("BHSN 214")
-    room1.add_unavailable_time("Tuesday", "9am", "11am")
-    professor1 = Professor("Dr. Reed")
-    professor1.add_unavailable_time("Thursday", "8am", "10am")
-    info1 = CourseInfo("Intro to Python", professor1, room1, 1, 3)
+    # room1 = Room("BHSN 214")
+    # room1.add_unavailable_time("Tuesday", "9am", "11am")
+    # professor1 = Professor("Dr. Reed")
+    # professor1.add_unavailable_time("Thursday", "8am", "10am")
+    info1 = CourseInfo("Intro to Python", "Dr.Reed", "CS160", 1, 3)
     time1 = TimeAndLocation("8am", ["Tuesday", "Thursday"], "BHSN 214")
     course1 = Course(time1, info1, False)
     schedule.addCourse(course1)
 
-    # interacting = True
-    # while (interacting):
-        # firstPromt = input("Would you like to add or edit a course? Enter A for add, E for edit, or D if you are done:")
-        # firstPromt = firstPromt.upper()
-        # if firstPromt == "A":
-            # course = schedule.createCourse()
-            # schedule.addCourse(course)
-        # if firstPromt == "E":
-            # if len(schedule.courses) == 0:
-                # print("There are no courses in the schedule to edit, please add a course.")
-            # else:
-                # schedule.editCourse()
-        # if firstPromt == "P":
-            # # code to print schedule
-            # pass
-        # if firstPromt == "D":
-            # interacting = False
 
     root = tk.Tk()
     calendar = CalendarUI(root)
-    calendar.add_course("Intro to Python", "Dr.Reed", "CS101", 1, 3, "10am", ["Tuesday", "Thursday"], "BHSN 224")
-    calendar.add_course("Software Engineering", "Dr.Feng", "CS330", 1, 3, "8am", ["Monday", "Wednesday", "Friday"], "BHSN 224")
+    calendar.add_course(course1)
 
     # for courses in schedule.courses:
-        # calendar.add_course(CourseInfo.changeName, CourseInfo.changeInstructor, CourseInfo.changeCode, CourseInfo.changeSecNum, CourseInfo.changeCredit, TimeAndLocation.changeTime, TimeAndLocation.changeDays, TimeAndLocation.changeLocation)
+    # calendar.add_course(CourseInfo.changeName, CourseInfo.changeInstructor, CourseInfo.changeCode, CourseInfo.changeSecNum, CourseInfo.changeCredit, TimeAndLocation.changeTime, TimeAndLocation.changeDays, TimeAndLocation.changeLocation)
 
     root.mainloop()
 
