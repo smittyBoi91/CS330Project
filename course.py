@@ -39,45 +39,45 @@ class TimeAndLocation:
 
     def changeLocation(self, newLocation: str):
         self.location = newLocation
-
-
-class Room:
-    def __init__(self, number):
-        self.number = number
-        self.schedule = {}
-
-    def add_unavailable_time(self, day, start_time, end_time):
-        if day not in self.schedule:
-            self.schedule[day] = []
-        self.schedule[day].append((start_time, end_time))
-
-    def is_available(self, day, start_time, end_time):
-        if day not in self.schedule:
-            return True
-        for period in self.schedule[day]:
-            if start_time < period[1] and end_time > period[0]:
-                return False
-        return True
-
-
-class Professor:
-    def __init__(self, name):
-        self.name = name
-        self.schedule = {}
-
-    def add_unavailable_time(self, day, start_time, end_time):
-        if day not in self.schedule:
-            self.schedule[day] = []
-        self.schedule[day].append((start_time, end_time))
-
-    def is_available(self, day, start_time, end_time):
-        if day not in self.schedule:
-            return True
-        for period in self.schedule[day]:
-            if start_time < period[1] and end_time > period[0]:
-                return False
-        return True
-
+#
+#
+# class Room:
+#     def __init__(self, number):
+#         self.number = number
+#         self.schedule = {}
+#
+#     def add_unavailable_time(self, day, start_time, end_time):
+#         if day not in self.schedule:
+#             self.schedule[day] = []
+#         self.schedule[day].append((start_time, end_time))
+#
+#     def is_available(self, day, start_time, end_time):
+#         if day not in self.schedule:
+#             return True
+#         for period in self.schedule[day]:
+#             if start_time < period[1] and end_time > period[0]:
+#                 return False
+#         return True
+#
+#
+# class Professor:
+#     def __init__(self, name):
+#         self.name = name
+#         self.schedule = {}
+#
+#     def add_unavailable_time(self, day, start_time, end_time):
+#         if day not in self.schedule:
+#             self.schedule[day] = []
+#         self.schedule[day].append((start_time, end_time))
+#
+#     def is_available(self, day, start_time, end_time):
+#         if day not in self.schedule:
+#             return True
+#         for period in self.schedule[day]:
+#             if start_time < period[1] and end_time > period[0]:
+#                 return False
+#         return True
+#
 
 class Course:
     def __init__(self, TimeAndLocation: TimeAndLocation, CourseInfo: CourseInfo, conflict: bool):
@@ -98,19 +98,63 @@ class Timetable:
         self.schedule = [Course]
         self.week = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
         self.times = ["8am", "9am", "10am", "11am", "12pm", "1pm", "2pm", "3pm", "4pm", "5pm"]
-        self.availableTimes = {"Monday": ["8am", "9am", "10am", "11am", "12pm", "1pm", "2pm", "3pm", "4pm", "5pm"],
-                               "Tuesday": ["9am", "10am", "11am", "12pm", "1pm", "2pm", "3pm", "4pm", "5pm"],
-                               "Wednesday": ["8am", "9am", "10am", "11am", "12pm", "1pm", "2pm", "3pm", "4pm", "5pm"],
-                               "Thursday": ["8am", "9am", "10am", "11am", "12pm", "1pm", "2pm", "3pm", "4pm", "5pm"],
-                               "Friday": ["8am", "9am", "10am", "11am", "12pm", "1pm", "2pm", "3pm", "4pm", "5pm"]}
         # dict for avail room times
         self.roomTimes = {}
         # dict for avail professor times
         self.profTimes = {}
 
-    def checkProfTime(self, prof: str, time: str) -> bool:
+    def checkProfTime(self, prof: str, days: [], time: str) -> bool:
         timeAvail = True
-        
+        timeDict = {"Monday": ["8am", "9am", "10am", "11am", "12pm", "1pm", "2pm", "3pm", "4pm", "5pm"],
+                "Tuesday": ["8am", "9am", "10am", "11am", "12pm", "1pm", "2pm", "3pm", "4pm", "5pm"],
+                "Wednesday": ["8am", "9am", "10am", "11am", "12pm", "1pm", "2pm", "3pm", "4pm", "5pm"],
+                "Thursday": ["8am", "9am", "10am", "11am", "12pm", "1pm", "2pm", "3pm", "4pm", "5pm"],
+                "Friday": ["8am", "9am", "10am", "11am", "12pm", "1pm", "2pm", "3pm", "4pm", "5pm"]}
+
+        if prof in self.profTimes:
+            oldProfTimes = self.profTimes.get(prof)
+            for i in range(len(days)):
+                availableDayTimes = oldProfTimes.get(days[i])
+                if time in availableDayTimes:
+                    availableDayTimes.remove(time)
+                    oldProfTimes[days[i]] = availableDayTimes
+                else:
+                    timeAvail = False
+        if prof not in self.profTimes:
+            newProfTimes = timeDict
+            for i in range(len(days)):
+                availableDayTimes = newProfTimes.get(days[i])
+                if time in availableDayTimes:
+                    availableDayTimes.remove(time)
+                    newProfTimes[days[i]] = availableDayTimes
+            self.profTimes[prof] = newProfTimes
+        return timeAvail
+
+    def checkRoomTime(self, room: str, days: [], time: str) -> bool:
+        timeAvail = True
+        timeDict = {"Monday": ["8am", "9am", "10am", "11am", "12pm", "1pm", "2pm", "3pm", "4pm", "5pm"],
+                "Tuesday": ["8am", "9am", "10am", "11am", "12pm", "1pm", "2pm", "3pm", "4pm", "5pm"],
+                "Wednesday": ["8am", "9am", "10am", "11am", "12pm", "1pm", "2pm", "3pm", "4pm", "5pm"],
+                "Thursday": ["8am", "9am", "10am", "11am", "12pm", "1pm", "2pm", "3pm", "4pm", "5pm"],
+                "Friday": ["8am", "9am", "10am", "11am", "12pm", "1pm", "2pm", "3pm", "4pm", "5pm"]}
+
+        if prof in self.profTimes:
+            oldRoomTimes = self.roomTimes.get(room)
+            for i in range(len(days)):
+                availableRoomTimes = oldRoomTimes.get(days[i])
+                if time in availableRoomTimes:
+                    availableRoomTimes.remove(time)
+                    oldRoomTimes[days[i]] = availableRoomTimes
+                else:
+                    timeAvail = False
+        if prof not in self.profTimes:
+            newRoomTimes = timeDict
+            for i in range(len(days)):
+                availableRoomTimes = newRoomTimes.get(days[i])
+                if time in availableDayTimes:
+                    availableRoomTimes.remove(time)
+                    newRoomTimes[days[i]] = availableRoomTimes
+            self.roomTimes[prof] = newRoomTimes
         return timeAvail
 
     def checkTimeAvailable(self, days: list, time: str) -> bool:
@@ -209,11 +253,10 @@ class Timetable:
         while timeCheck == False:
             time = input("Please enter a time between 8am and 5pm e.g. 9am, 11am, 4pm:")
             timeCheck = self.checkTime(time)
-        conflicts = self.checkTimeAvailable(days, time)
-        while conflicts == False:
-            time = input("This Start time is not available, please choose another time:")
-            timeCheck = self.checkTime(time)
-            conflicts = self.checkTimeAvailable(days, time)
+        # while conflicts == False:
+        #     time = input("This Start time is not available, please choose another time:")
+        #     timeCheck = self.checkTime(time)
+        #     conflicts = self.checkTimeAvailable(days, time)
         building = input("Please enter the 4 letter building acronym e.g. BHSN:")
         while len(building) != 4:
             building = input("Building acronym must be 4 letters, please enter a valid acronym:")
@@ -222,6 +265,26 @@ class Timetable:
         while len(roomNum) != 3:
             roomNum = input("Room number must be 3 digits, please enter a valid room number:")
         location = building + " " + roomNum
+        roomAvailable = self.checkRoomTime(location, days, time)
+###-------------------TEST THIS ON WEDNESDAY-------------------###
+        while roomAvailable == False:
+            roomOrTime = input("That time is unavailable, press T to change the time or R to change the room")
+            roomOrTime = roomOrTime.upper()
+            if roomOrTime == T:
+                # can show available times here
+                time = input("Please enter a time between 8am and 5pm e.g. 9am, 11am, 4pm:")
+                timeCheck = self.checkTime(time)
+                self.checkRoomTime(location, days, time)
+            if roomOrTime == R:
+                building = input("Please enter the 4 letter building acronym e.g. BHSN:")
+                while len(building) != 4:
+                    building = input("Building acronym must be 4 letters, please enter a valid acronym:")
+                building = building.upper()
+                roomNum = input("Please enter the 3 digit room number:")
+                while len(roomNum) != 3:
+                    roomNum = input("Room number must be 3 digits, please enter a valid room number:")
+                location = building + " " + roomNum
+                self.checkRoomTime(location, days, time)
         timeAndLocation = TimeAndLocation(time, days, location)
         # -------------------------Course Info-----------------------------------------
         courseName = input("Please enter the course name:")
@@ -230,6 +293,22 @@ class Timetable:
         instructor = input("Please enter the instructors name:")
         while len(instructor) == 0:
             instructor = input("Please enter a valid instructor name:")
+        instructorAvail = self.checkProfTime(instructor, days, time)
+        while instructorAvail == False:
+            roomOrTime = input("That time is unavailable, press I to change the instructor or T to change the room")
+            roomOrTime = roomOrTime.upper()
+            if roomOrTime == T:
+                # can show available times here
+                time = input("Please enter a time between 8am and 5pm e.g. 9am, 11am, 4pm:")
+                timeCheck = self.checkTime(time)
+                self.checkRoomTime(location, days, time)
+            if roomOrTime == I:
+                instructor = input("Please enter the instructors name:")
+                while len(instructor) == 0:
+                    instructor = input("Please enter a valid instructor name:")
+                instructorAvail = self.checkProfTime(instructor, days, time)
+                location = building + " " + roomNum
+                self.checkRoomTime(location, days, time)
         code = input("Please enter the course code e.g. CS160:")
         while len(code) == 0:
             code = input("Please enter a valid course code e.g. CS160:")
@@ -493,16 +572,33 @@ class CalendarUI:
 
 def main():
     schedule = Timetable()
-    # room1 = Room("BHSN 214")
-    # room1.add_unavailable_time("Tuesday", "9am", "11am")
-    # professor1 = Professor("Dr. Reed")
-    # professor1.add_unavailable_time("Thursday", "8am", "10am")
-    info1 = CourseInfo("Intro to Python", "Dr.Reed", "CS160", 1, 3)
-    time1 = TimeAndLocation("8am", ["Tuesday", "Thursday"], "BHSN 214")
-    course1 = Course(time1, info1, False)
-    schedule.addCourse(course1)
 
+    def main():
+        schedule = Timetable()
+        info1 = CourseInfo("Intro to Python", "Dr.Reed", "CS101", 1, 3)
+        time1 = TimeAndLocation("8am", ["Tuesday", "Thursday"], "BHSN 214")
+        course1 = Course(time1, info1, False)
+        schedule.addCourse(course1)
+        interacting = True
+        while (interacting):
+            firstPromt = input(
+                "Would you like to add or edit a course? Enter A for add, E for edit, or D if you are done:")
+            firstPromt = firstPromt.upper()
+            if firstPromt == "A":
+                course = schedule.createCourse()
+                schedule.addCourse(course)
+            if firstPromt == "E":
+                if len(schedule.courses) == 0:
+                    print("There are no courses in the schedule to edit, please add a course.")
+                else:
+                    schedule.editCourse()
+            if firstPromt == "P":
+                # code to print schedule
+                pass
+            if firstPromt == "D":
+                interacting = False
 
+    main()
     root = tk.Tk()
     calendar = CalendarUI(root)
     calendar.add_course(course1)
