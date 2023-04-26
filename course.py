@@ -39,45 +39,6 @@ class TimeAndLocation:
 
     def changeLocation(self, newLocation: str):
         self.location = newLocation
-#
-#
-# class Room:
-#     def __init__(self, number):
-#         self.number = number
-#         self.schedule = {}
-#
-#     def add_unavailable_time(self, day, start_time, end_time):
-#         if day not in self.schedule:
-#             self.schedule[day] = []
-#         self.schedule[day].append((start_time, end_time))
-#
-#     def is_available(self, day, start_time, end_time):
-#         if day not in self.schedule:
-#             return True
-#         for period in self.schedule[day]:
-#             if start_time < period[1] and end_time > period[0]:
-#                 return False
-#         return True
-#
-#
-# class Professor:
-#     def __init__(self, name):
-#         self.name = name
-#         self.schedule = {}
-#
-#     def add_unavailable_time(self, day, start_time, end_time):
-#         if day not in self.schedule:
-#             self.schedule[day] = []
-#         self.schedule[day].append((start_time, end_time))
-#
-#     def is_available(self, day, start_time, end_time):
-#         if day not in self.schedule:
-#             return True
-#         for period in self.schedule[day]:
-#             if start_time < period[1] and end_time > period[0]:
-#                 return False
-#         return True
-#
 
 class Course:
     def __init__(self, TimeAndLocation: TimeAndLocation, CourseInfo: CourseInfo, conflict: bool):
@@ -138,7 +99,7 @@ class Timetable:
                 "Thursday": ["8am", "9am", "10am", "11am", "12pm", "1pm", "2pm", "3pm", "4pm", "5pm"],
                 "Friday": ["8am", "9am", "10am", "11am", "12pm", "1pm", "2pm", "3pm", "4pm", "5pm"]}
 
-        if prof in self.profTimes:
+        if room in self.roomTimes:
             oldRoomTimes = self.roomTimes.get(room)
             for i in range(len(days)):
                 availableRoomTimes = oldRoomTimes.get(days[i])
@@ -147,14 +108,14 @@ class Timetable:
                     oldRoomTimes[days[i]] = availableRoomTimes
                 else:
                     timeAvail = False
-        if prof not in self.profTimes:
+        if room not in self.roomTimes:
             newRoomTimes = timeDict
             for i in range(len(days)):
                 availableRoomTimes = newRoomTimes.get(days[i])
-                if time in availableDayTimes:
+                if time in availableRoomTimes:
                     availableRoomTimes.remove(time)
                     newRoomTimes[days[i]] = availableRoomTimes
-            self.roomTimes[prof] = newRoomTimes
+            self.roomTimes[room] = newRoomTimes
         return timeAvail
 
     def checkTimeAvailable(self, days: list, time: str) -> bool:
@@ -270,12 +231,12 @@ class Timetable:
         while roomAvailable == False:
             roomOrTime = input("That time is unavailable, press T to change the time or R to change the room")
             roomOrTime = roomOrTime.upper()
-            if roomOrTime == T:
+            if roomOrTime == "T":
                 # can show available times here
                 time = input("Please enter a time between 8am and 5pm e.g. 9am, 11am, 4pm:")
                 timeCheck = self.checkTime(time)
-                self.checkRoomTime(location, days, time)
-            if roomOrTime == R:
+                roomAvailable = self.checkRoomTime(location, days, time)
+            if roomOrTime == "R":
                 building = input("Please enter the 4 letter building acronym e.g. BHSN:")
                 while len(building) != 4:
                     building = input("Building acronym must be 4 letters, please enter a valid acronym:")
@@ -500,6 +461,9 @@ class Timetable:
                     if done == "N":
                         stillEditing = False
 
+    def removeCourse(self, indexToRemove: int):
+        self.courses.remove(self.courses[indexToRemove])
+
 
 class CalendarUI:
     def __init__(self, master):
@@ -572,44 +536,111 @@ class CalendarUI:
 
 def main():
     schedule = Timetable()
-
-    def main():
-        schedule = Timetable()
-        info1 = CourseInfo("Intro to Python", "Dr.Reed", "CS101", 1, 3)
-        time1 = TimeAndLocation("8am", ["Tuesday", "Thursday"], "BHSN 214")
-        course1 = Course(time1, info1, False)
-        schedule.addCourse(course1)
-        interacting = True
-        while (interacting):
-            firstPromt = input(
-                "Would you like to add or edit a course? Enter A for add, E for edit, or D if you are done:")
-            firstPromt = firstPromt.upper()
-            if firstPromt == "A":
-                course = schedule.createCourse()
-                schedule.addCourse(course)
-            if firstPromt == "E":
-                if len(schedule.courses) == 0:
-                    print("There are no courses in the schedule to edit, please add a course.")
+    info1 = CourseInfo("Intro to Python", "Dr.Reed", "CS101", 1, 3)
+    time1 = TimeAndLocation("8am", ["Monday"], "BHSN 214")
+    schedule.checkProfTime(info1.instructor, time1.days, time1.time)
+    schedule.checkRoomTime(time1.location, time1.days, time1.time)
+    course1 = Course(time1, info1, False)
+    info2 = CourseInfo("math", "smith", "CS101", 1, 3)
+    time2 = TimeAndLocation("8am", ["Tuesday", "Thursday"], "BHSN 200")
+    course2 = Course(time2, info2, False)
+    schedule.checkProfTime(info2.instructor, time2.days, time2.time)
+    schedule.checkRoomTime(time2.location, time2.days, time2.time)
+    schedule.addCourse(course2)
+    schedule.addCourse(course1)
+    interacting = True
+    while (interacting):
+        prompt = input(
+            "What would you like to do? Enter A to add a course, R to remove a course, E to edit a course, "
+            "P to print schedules,"" or D if you are done:")
+        prompt = prompt.upper()
+        if prompt == "A":
+            course = schedule.createCourse()
+            schedule.addCourse(course)
+        if prompt == "R":
+            courseIndex = []
+            print("Courses are:")
+            for i in range(len(schedule.courses)):
+                courseIndex.append(i)
+                print(f"{i}:{schedule.courses[i].CourseInfo.code} {schedule.courses[i].CourseInfo.courseName}-"
+                      f"{schedule.courses[i].CourseInfo.secNum} {schedule.courses[i].CourseInfo.instructor} "
+                      f"{schedule.courses[i].TimeAndLocation.time} {schedule.courses[i].TimeAndLocation.location} "
+                      f"{schedule.courses[i].TimeAndLocation.days}")
+            selection = input("Enter the number for the course you would like to remove:")
+            selection = int(selection)
+            validNum = False
+            if selection not in courseIndex:
+                validNum = False
+            else:
+                validNum = True
+            while validNum == False:
+                selection = input("That is not a valid selection, please choose again:")
+                selection = int(selection)
+                if selection not in courseIndex:
+                    validNum = False
                 else:
-                    schedule.editCourse()
-            if firstPromt == "P":
-                # code to print schedule
-                pass
-            if firstPromt == "D":
-                interacting = False
+                    validNum = True
+            schedule.removeCourse(selection)
+        if prompt == "E":
+            if len(schedule.courses) == 0:
+                print("There are no courses in the schedule to edit, please add a course.")
+            else:
+                schedule.editCourse()
+        if prompt == "P":
+            calendarSelection = input("Press A to print all schedules or I for a specific instructors schedule:")
+            calendarSelection = calendarSelection.upper()
+            if calendarSelection == "A":
+                instructors = list(schedule.profTimes.keys())
+                root = tk.Tk()
+                # calendar = CalendarUI(root)
+                for i in range(len(instructors)):
+                    root = tk.Tk()
+                    calendar = CalendarUI(root)
+                    for j in range(len(schedule.courses)):
+                        if schedule.courses[j].CourseInfo.instructor == instructors[i]:
+                            # root = tk.Tk()
+                            # calendar = CalendarUI(root)
+                            calendar.add_course(schedule.courses[j])
+                root.mainloop()
+            if calendarSelection == "I":
+                instructors = list(schedule.profTimes.keys())
+                instIndex = []
+                print("Instructors with courses are:")
+                for i in range(len(instructors)):
+                    instIndex.append(i)
+                    print(f"{i}:{instructors[i]}")
+                selection = input("Please enter the number of the instructor to print their schedule:")
+                selection = int(selection)
+                validNum = False
+                if selection not in instIndex:
+                    validNum = False
+                else:
+                    validNum = True
+                while validNum == False:
+                    selection = input("That is not a valid selection, please choose again:")
+                    selection = int(selection)
+                    if selection not in instIndex:
+                        validNum = False
+                    else:
+                        validNum = True
+                root = tk.Tk()
+                calendar = CalendarUI(root)
+                for j in range(len(schedule.courses)):
+                    if schedule.courses[j].CourseInfo.instructor == instructors[selection]:
+                        # root = tk.Tk()
+                        # calendar = CalendarUI(root)
+                        calendar.add_course(schedule.courses[j])
+                root.mainloop()
 
-    main()
-    root = tk.Tk()
-    calendar = CalendarUI(root)
-    calendar.add_course(course1)
-
-    # for courses in schedule.courses:
-    # calendar.add_course(CourseInfo.changeName, CourseInfo.changeInstructor, CourseInfo.changeCode, CourseInfo.changeSecNum, CourseInfo.changeCredit, TimeAndLocation.changeTime, TimeAndLocation.changeDays, TimeAndLocation.changeLocation)
-
-    root.mainloop()
-
-
+        if prompt == "D":
+            interacting = False
+    # root = tk.Tk()
+    # calendar = CalendarUI(root)
+    # calendar.add_course(course1)
+    # calendar.add_course(course2)
+    # root.mainloop()
 main()
+
 # info1 = CourseInfo("math", "smith", "CS101", 1, 3)
 # time1 = TimeAndLocation("8am", ["Tuesday", "Thursday"], ("BHSN", 214))
 # course1 = Course(time1, info1, False)
